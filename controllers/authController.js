@@ -18,6 +18,7 @@ export const register = async (req, res) => {
       image,
       pendingRequests: [],
       chats: [],
+      contacts: [],
     });
     await newUser.save();
     res.status(201).json({
@@ -39,9 +40,9 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    if (user.password !== hashedPassword) {
-      return res.stats(400).json({ message: "Invalid credentials" });
+    const isPasswordCorrect = bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {

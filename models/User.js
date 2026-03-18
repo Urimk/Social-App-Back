@@ -28,12 +28,13 @@ const UserSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    chats: [
+    contacts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Chat",
+        ref: "User",
       },
     ],
+    chats: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chat" }],
   },
   { timestamps: true },
 );
