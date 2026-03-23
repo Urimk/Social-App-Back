@@ -132,6 +132,9 @@ export const sendMessage = async (req, res) => {
     if (!existingChat) {
       return res.status(404).json({ message: "Chat not found" });
     }
+    const toUserId = existingChat.users.filter(
+      (id) => id.toString() !== userId.toString(),
+    );
     const newMessage = new Message({
       text: content,
       authorId: userId,
@@ -140,6 +143,14 @@ export const sendMessage = async (req, res) => {
     await newMessage.save();
     existingChat.messages.push(newMessage._id);
     existingChat.save();
+    const io = req.app.get("io");
+    console.log("Rooms currently active:", io.sockets.adapter.rooms);
+    console.log(
+      "Am I trying to send to a valid room?",
+      io.sockets.adapter.rooms.has(toUserId.toString()),
+    );
+    io.to(toUserId.toString()).emit("message_received", newMessage);
+    console.log("send to ", toUserId.toString());
     return res
       .status(200)
       .json({ message: "Added new message", messageObj: newMessage });

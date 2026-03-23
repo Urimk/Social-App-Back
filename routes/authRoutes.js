@@ -5,6 +5,8 @@ import { protectRoute } from "../middleware/auth.js";
 const router = express.Router();
 
 router.post("/login", login);
-router.get("/check", protectRoute);
+router.get("/check", protectRoute, (req, res) =>
+  res.status(200).json({ message: "Authorized", userId: req.user.id }),
+);
 
 export default router;

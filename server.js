@@ -7,14 +7,22 @@ import usersRoutes from "./routes/usersRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import imageRoutes from "./routes/imageRoutes.js";
 import dns from "node:dns/promises";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
 
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const app = express();
-app.use(cors());
+dotenv.config();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "10mb" }));
 
-dotenv.config();
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5000;
 
@@ -28,10 +36,34 @@ app.use("/users", usersRoutes);
 app.use("/chat", chatRoutes);
 app.use("/image", imageRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "active", message: "Server is running" });
+});
+
+const server = createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+  },
+});
+
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log("a user connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected:", socket.id);
+  });
+
+  socket.on("setup", (userId) => {
+    socket.join(userId.toString());
+    console.log("User joined personal room: ", userId.toString());
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
