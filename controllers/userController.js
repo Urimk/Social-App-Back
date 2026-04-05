@@ -65,3 +65,19 @@ export const deleteRequest = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    const isPasswordCorrect = bcrypt.compare(req.body.password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Wrong Password" });
+    }
+    await User.findByIdAndDelete(userId);
+    res.status(200).json({ message: "Deleted User" });
+  } catch (error) {
+    console.error("Error deleting User:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
