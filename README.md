@@ -1,10 +1,10 @@
-# Real-Time Chat Application (Backend) ⚙️
+# Real-Time Chat Application (Backend)
 
 A robust, secure, and scalable Node.js server that powers the Real-Time Chat Application. It provides RESTful APIs for user authentication and data management, alongside real-time WebSocket communication for instant messaging.
 
-[Live API URL](#) | [Frontend Repository](#)
+[Live API URL](https://social-app-back-2bsl.onrender.com) | [Frontend Repository](https://github.com/Urimk/Social-App-Front)
 
-## ✨ Key Features
+##  Key Features
 
 * **Real-Time Engine:** Built with `socket.io` utilizing private rooms (`io.to(userId)`) to ensure targeted and efficient message delivery.
 * **Authentication & Security:** Secure user registration and login flows using **JSON Web Tokens (JWT)** for session management and **Bcrypt.js** for password hashing.
@@ -13,7 +13,7 @@ A robust, secure, and scalable Node.js server that powers the Real-Time Chat App
 * **Protected Routes:** Custom Express middleware to verify JWTs and protect sensitive user endpoints.
 * **CORS Configured:** Safely configured to communicate strictly with the authorized frontend origin.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 * **Runtime:** Node.js
 * **Framework:** Express.js
@@ -21,7 +21,7 @@ A robust, secure, and scalable Node.js server that powers the Real-Time Chat App
 * **WebSockets:** Socket.io
 * **Security & Utilities:** JWT, bcryptjs, cors, dotenv, multer, cloudinary
 * 
-## ⚙️ Environment Variables
+##  Environment Variables
 
 Create a `.env` file in the root directory and configure the following variables:
 
@@ -39,7 +39,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 🚀 Run Locally
 1. Clone the project:
 ```bash
-git clone [https://github.com/Urimk/your-backend-repo-name.git](https://github.com/Urimk/your-backend-repo-name.git)
+git clone [https://github.com/Urimk/Social-App-Back](https://github.com/Urimk/Social-App-Back)
 ```
 2. Navigate to the directory and install dependencies:
 ```bash
@@ -53,19 +53,32 @@ npm run dev
 ```
 📡 API Reference (Core Endpoints)
 Authentication:
-* POST /api/auth/register - Create a new user account
+* GET /api/auth/check - Check server status
 * POST /api/auth/login - Authenticate user and return JWT
 
 Users:
-* GET /api/users - Search for friends/users (Protected)
-* PUT /api/users/profile - Update display name or avatar (Protected)
-* DELETE /api/users/me - Delete user account and associated data (Protected)
+* POST /api/users/register - Create a new User
+* POST /api/users/:display/request - Send friend request to a user (Protected)
+* GET /api/users/requests - Get all of the friend request to the user (Protected)
+* DELETE /api/users/:display/request - Delete a friend request to a user (Protected)
+* DELETE /api/users/ - Delete user account and associated data (Protected)
 
-Chat & Messages:
-* POST /api/messages - Save a new message to the database (Protected)
-* GET /api/messages/:chatId - Retrieve conversation history (Protected)
+Profile Images:
+* GET /api/image/ - Retrieve the user's current profile picture (Protected)
+* POST /api/image/ - Upload a new profile picture
+* PATCH /api/image/ - Update/Change the existing profile picture (Protected)
+
+Chats & Messages:
+* GET /api/chat/ - Get all active chats for the authenticated user (Protected)
+* POST /api/chat/:display/acceptRequest - Accept a friend request and initialize a new chat room (Protected)
+* GET /api/chat/:id/messages - Retrieve the message history for a specific chat (Protected)
+* POST /api/chat/:id/message - Send a new message to a specific chat (Protected)
+* GET /api/chat/:id/lastMessage - Fetch the most recent message of a specific chat (Protected)
+
+
 
 🗺️ Roadmap (Upcoming Features)
-[Add future backend features here, e.g., image upload to Cloudinary/S3, message encryption, group chats]
+[Add future backend features here]
+---
 
 Created by Uri Knoll
