@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+/**
+ * User model schema.
+ * Represents a user with authentication and social features.
+ */
 const UserSchema = new mongoose.Schema(
   {
     firstName: {

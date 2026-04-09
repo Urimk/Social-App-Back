@@ -2,6 +2,11 @@ import { User } from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+/**
+ * Registers a new user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const register = async (req, res) => {
   try {
     const { firstName, lastName, displayName, password, image } = req.body;
@@ -31,6 +36,11 @@ export const register = async (req, res) => {
   }
 };
 
+/**
+ * Logs in a user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const login = async (req, res) => {
   try {
     const { displayName, password } = req.body;
