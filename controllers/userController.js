@@ -1,4 +1,5 @@
 import { User } from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 export const sendRequest = async (req, res) => {
   try {

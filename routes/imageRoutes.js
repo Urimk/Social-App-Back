@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.get("/", protectRoute, getProfilePic);
 
-router.post("/", protectRoute, uploadProfilePic);
+router.post("/", uploadProfilePic);
 
 router.patch("/", protectRoute, changeProfilePic);
 

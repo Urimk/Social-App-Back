@@ -12,6 +12,7 @@ export const uploadProfilePic = [
   upload.single("image"),
   async (req, res) => {
     try {
+      console.log("MMMM");
       const stream = cloudinary.uploader.upload_stream(
         { folder: "chatapp" },
         (error, result) => {
