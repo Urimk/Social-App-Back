@@ -2,12 +2,21 @@ import upload from "../middleware/multer.js";
 import cloudinary from "../config/cloudinary.js";
 import { User } from "../models/User.js";
 
+/**
+ * Gets the profile picture URL for the authenticated user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const getProfilePic = async (req, res) => {
   return res.status(200).json({
     image: req.user.image,
   });
 };
 
+/**
+ * Uploads a profile picture to Cloudinary.
+ * Middleware array: multer upload + upload handler.
+ */
 export const uploadProfilePic = [
   upload.single("image"),
   async (req, res) => {
@@ -28,6 +37,10 @@ export const uploadProfilePic = [
   },
 ];
 
+/**
+ * Changes the profile picture for the authenticated user.
+ * Middleware array: multer upload + update handler.
+ */
 export const changeProfilePic = [
   upload.single("image"),
   async (req, res) => {

@@ -2,6 +2,11 @@ import { Chat } from "../models/Chat.js";
 import { Message } from "../models/Message.js";
 import { User } from "../models/User.js";
 
+/**
+ * Adds a new chat between users.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const addChat = async (req, res) => {
   try {
     const displayName = req.params.display;
@@ -41,6 +46,11 @@ export const addChat = async (req, res) => {
   }
 };
 
+/**
+ * Gets all chats for the user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const getChats = async (req, res) => {
   try {
     const existingUser = req.user;
