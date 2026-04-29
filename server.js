@@ -10,7 +10,7 @@ import dns from "node:dns/promises";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+//dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const app = express();
 dotenv.config();
@@ -21,7 +21,7 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "8mb" }));
 
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5000;
@@ -29,7 +29,10 @@ const PORT = process.env.PORT || 5000;
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch((err) => {
+    console.error("MongoDB connection error:", err)
+    process.exit(1);
+  });
 
 app.use("/auth", authRoutes);
 app.use("/users", usersRoutes);
@@ -69,7 +72,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("setup", (userId) => {
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      return;
+    }
+    // Leave the previous room if already set up
+    if (socket.data.userId) {
+      socket.leave(socket.data.userId);
+    }
     socket.join(userId.toString());
+    socket.data.userId = userId.toString();
     console.log("User joined personal room: ", userId.toString());
   });
 });
