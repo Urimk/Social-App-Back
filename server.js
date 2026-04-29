@@ -48,7 +48,7 @@ app.use("/chat", chatRoutes);
 app.use("/image", imageRoutes);
 
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "active", message: "Server is running" });
+  return res.status(200).json({ status: "active", message: "Server is running" });
 });
 
 const server = createServer(app);
