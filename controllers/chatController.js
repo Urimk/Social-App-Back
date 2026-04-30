@@ -29,7 +29,7 @@ export const addChat = async (req, res) => {
     });
     sender.contacts.push(receiverId);
     sender.chats.push(newChat._id);
-    sender.save();
+    await sender.save();
     const lastMessage = null;
     return res.status(201).json({
       message: "Chat created successfully",
@@ -75,14 +75,14 @@ export const getChats = async (req, res) => {
             image: user.image,
             lastMessage,
           };
-          chats.push(shortChat);
+          chats.addToSet(shortChat);
           break;
         }
       }
     }
     return res.status(200).json({ chats });
   } catch (error) {
-    console.error("Error loading Message:", error);
+    console.error("Error loading chats:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -90,7 +90,7 @@ export const getChats = async (req, res) => {
 export const getLastMessage = async (req, res) => {
   try {
     const chatId = req.params.id;
-    const existingChat = await Chat.findOne({ chatId });
+    const existingChat = await Chat.findById(chatId);
     if (!existingChat) {
       return res.status(404).json({ message: "Chat not found" });
     }
@@ -99,7 +99,7 @@ export const getLastMessage = async (req, res) => {
     }
     const lastMessageId =
       existingChat.messages[existingChat.messages.length - 1];
-    const message = await Message.findOne({ lastMessageId });
+    const message = await Message.findById({ lastMessageId });
     if (!message) {
       return res.status(404).json({ message: "Message not found" });
     }
@@ -152,20 +152,14 @@ export const sendMessage = async (req, res) => {
     });
     await newMessage.save();
     existingChat.messages.push(newMessage._id);
-    existingChat.save();
+    await existingChat.save();
     const io = req.app.get("io");
-    console.log("Rooms currently active:", io.sockets.adapter.rooms);
-    console.log(
-      "Am I trying to send to a valid room?",
-      io.sockets.adapter.rooms.has(toUserId.toString()),
-    );
     io.to(toUserId.toString()).emit("message_received", newMessage);
-    console.log("send to ", toUserId.toString());
     return res
       .status(200)
       .json({ message: "Added new message", messageObj: newMessage });
   } catch (error) {
-    console.error("Error loading Message:", error);
+    console.error("Error sending Message:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
