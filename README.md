@@ -29,7 +29,7 @@ Create a `.env` file in the root directory and configure the following variables
 PORT=4000
 MONGO_URI=your_mongodb_atlas_connection_string
 JWT_SECRET=your_super_secret_jwt_key
-CLIENT_URL=http://localhost:3000 # Change this to your Vercel URL in production
+FRONTEND_URL=http://localhost:5173
 
 # Cloudinary Config
 CLOUDINARY_CLOUD_NAME=your_cloud_name

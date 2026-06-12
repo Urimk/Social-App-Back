@@ -15,18 +15,27 @@ dns.setServers(["8.8.8.8", "1.1.1.1"]);
 const app = express();
 dotenv.config();
 
+const normalizeOrigin = (url) => url?.replace(/\/$/, "").trim();
+
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.FRONTEND_URL,
-].filter(Boolean);
+  ...(process.env.ALLOWED_ORIGINS?.split(",") ?? []),
+]
+  .filter(Boolean)
+  .map(normalizeOrigin);
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
       callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+      return;
     }
+
+    console.warn(
+      `CORS blocked origin: ${origin}. Allowed: ${allowedOrigins.join(", ") || "(none configured)"}`,
+    );
+    callback(null, false);
   },
   credentials: true,
 };
