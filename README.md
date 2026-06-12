@@ -20,7 +20,6 @@ A robust, secure, and scalable Node.js server that powers the Real-Time Chat App
 * **Database:** MongoDB Atlas & Mongoose
 * **WebSockets:** Socket.io
 * **Security & Utilities:** JWT, bcryptjs, cors, dotenv, multer, cloudinary
-* 
 ##  Environment Variables
 
 Create a `.env` file in the root directory and configure the following variables:
