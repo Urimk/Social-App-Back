@@ -2,6 +2,9 @@ import { Chat } from "../models/Chat.js";
 import { Message } from "../models/Message.js";
 import { User } from "../models/User.js";
 
+const isChatParticipant = (chat, userId) =>
+  chat.users.some((id) => id.toString() === userId.toString());
+
 /**
  * Adds a new chat between users.
  * @param {Object} req - Express request object.
@@ -75,7 +78,7 @@ export const getChats = async (req, res) => {
             image: user.image,
             lastMessage,
           };
-          chats.addToSet(shortChat);
+          chats.push(shortChat);
           break;
         }
       }
@@ -117,6 +120,9 @@ export const getMessages = async (req, res) => {
     if (!existingChat) {
       return res.status(404).json({ message: "Chat not found" });
     }
+    if (!isChatParticipant(existingChat, req.user.id)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
     const messages = [];
     let message;
     for (let messageId of existingChat.messages) {
@@ -142,7 +148,10 @@ export const sendMessage = async (req, res) => {
     if (!existingChat) {
       return res.status(404).json({ message: "Chat not found" });
     }
-    const toUserId = existingChat.users.filter(
+    if (!isChatParticipant(existingChat, userId)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    const recipientId = existingChat.users.find(
       (id) => id.toString() !== userId.toString(),
     );
     const newMessage = new Message({
@@ -154,7 +163,9 @@ export const sendMessage = async (req, res) => {
     existingChat.messages.push(newMessage._id);
     await existingChat.save();
     const io = req.app.get("io");
-    io.to(toUserId.toString()).emit("message_received", newMessage);
+    if (recipientId) {
+      io.to(recipientId.toString()).emit("message_received", newMessage);
+    }
     return res
       .status(200)
       .json({ message: "Added new message", messageObj: newMessage });

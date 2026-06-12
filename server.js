@@ -9,6 +9,7 @@ import imageRoutes from "./routes/imageRoutes.js";
 import dns from "node:dns/promises";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import { socketAuth } from "./middleware/socketAuth.js";
 
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
@@ -69,25 +70,20 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-// Socket.io connection handling
+io.use(socketAuth);
+
 io.on("connection", (socket) => {
-  console.log("a user connected:", socket.id);
+  const userId = socket.data.userId;
+  if (!userId) {
+    socket.disconnect(true);
+    return;
+  }
+
+  socket.join(userId);
+  console.log(`User connected: ${socket.id} (room: ${userId})`);
 
   socket.on("disconnect", () => {
-    console.log("user disconnected:", socket.id);
-  });
-
-  socket.on("setup", (userId) => {
-    if (!userId || !mongoose.isValidObjectId(userId)) {
-      return;
-    }
-    // Leave the previous room if already set up
-    if (socket.data.userId) {
-      socket.leave(socket.data.userId);
-    }
-    socket.join(userId.toString());
-    socket.data.userId = userId.toString();
-    console.log("User joined personal room: ", userId.toString());
+    console.log(`User disconnected: ${socket.id}`);
   });
 });
 
