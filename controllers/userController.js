@@ -1,6 +1,11 @@
 import { User } from "../models/User.js";
 import bcrypt from "bcryptjs";
 
+/**
+ * Sends a friend request to another user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const sendRequest = async (req, res) => {
   try {
     const senderId = req.user.id;
@@ -26,6 +31,11 @@ export const sendRequest = async (req, res) => {
   }
 };
 
+/**
+ * Gets pending friend requests for the authenticated user.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const getRequests = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -49,6 +59,11 @@ export const getRequests = async (req, res) => {
   }
 };
 
+/**
+ * Deletes a friend request.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const deleteRequest = async (req, res) => {
   try {
     const displayName = req.params.display;
@@ -67,6 +82,11 @@ export const deleteRequest = async (req, res) => {
   }
 };
 
+/**
+ * Deletes the authenticated user account.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const deleteUser = async (req, res) => {
   try {
     const userId = req.user.id;

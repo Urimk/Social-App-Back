@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+/**
+ * Message model schema.
+ * Represents a message in a chat.
+ */
 const MessageSchema = new mongoose.Schema(
   {
     text: {

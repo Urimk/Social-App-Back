@@ -1,6 +1,13 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 
+/**
+ * Middleware to protect routes by verifying JWT token.
+ * Attaches the authenticated user to req.user if token is valid.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 export const protectRoute = async (req, res, next) => {
   if (
     req.headers.authorization &&

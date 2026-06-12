@@ -62,6 +62,7 @@ const io = new Server(server, {
 
 app.set("io", io);
 
+// Socket.io connection handling
 io.on("connection", (socket) => {
   console.log("a user connected:", socket.id);
 

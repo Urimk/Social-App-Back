@@ -10,6 +10,7 @@ import { protectRoute } from "../middleware/auth.js";
 
 const router = express.Router();
 
+// Chat routes
 router.get("/:id/lastMessage", protectRoute, getLastMessage);
 router.post("/:display/acceptRequest", protectRoute, addChat);
 router.get("/", protectRoute, getChats);

@@ -8,6 +8,7 @@ import { protectRoute } from "../middleware/auth.js";
 
 const router = express.Router();
 
+// Image routes
 router.get("/", protectRoute, getProfilePic);
 
 router.post("/", uploadProfilePic);
