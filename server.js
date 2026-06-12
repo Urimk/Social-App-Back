@@ -64,9 +64,21 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    ...corsOptions,
+    origin: (origin, callback) => {
+      if (!origin || isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      console.warn(`Socket.io CORS blocked origin: ${origin}`);
+      callback(null, false);
+    },
     methods: ["GET", "POST"],
   },
+});
+
+io.engine.on("connection_error", (error) => {
+  console.error("Socket.io connection error:", error.message);
 });
 
 app.set("io", io);
