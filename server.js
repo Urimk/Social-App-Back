@@ -16,21 +16,33 @@ dns.setServers(["8.8.8.8", "1.1.1.1"]);
 const app = express();
 dotenv.config();
 
-const allowedOrigins = ["http://localhost:5173", process.env.FRONTEND_URL];
+const normalizeOrigin = (url) => url?.replace(/\/$/, "").trim();
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  }),
-);
-app.use(express.json({ limit: "8mb" }));
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+  ...(process.env.ALLOWED_ORIGINS?.split(",") ?? []),
+]
+  .filter(Boolean)
+  .map(normalizeOrigin);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
+      callback(null, true);
+      return;
+    }
+
+    console.warn(
+      `CORS blocked origin: ${origin}. Allowed: ${allowedOrigins.join(", ") || "(none configured)"}`,
+    );
+    callback(null, false);
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.use(express.json({ limit: "10mb" }));
 
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5000;
@@ -56,15 +68,8 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    ...corsOptions,
     methods: ["GET", "POST"],
-    credentials: true,
   },
 });
 
