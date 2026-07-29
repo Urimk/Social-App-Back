@@ -1,4 +1,6 @@
 import { User } from "../models/User.js";
+import { Chat } from "../models/Chat.js";
+import { Message } from "../models/Message.js";
 import bcrypt from "bcryptjs";
 
 /**
@@ -25,6 +27,15 @@ export const sendRequest = async (req, res) => {
     }
     receiver.pendingRequests.addToSet(senderId);
     await receiver.save();
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(receiver._id.toString()).emit("request_received", {
+        displayName: req.user.displayName,
+        image: req.user.image,
+      });
+    }
+
     return res.status(200).json({
       message: "Friend request sent",
     });
@@ -81,6 +92,14 @@ export const deleteRequest = async (req, res) => {
     await User.findByIdAndUpdate(receiverId, {
       $pull: { pendingRequests: sender._id },
     });
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(sender._id.toString()).emit("request_declined", {
+        displayName: req.user.displayName,
+      });
+    }
+
     res.status(200).json({ message: "Deleted request" });
   } catch (error) {
     console.error("Error deleting request:", error);
@@ -97,10 +116,40 @@ export const deleteUser = async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
-    const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const isPasswordCorrect = await bcrypt.compare(
+      req.body.password,
+      user.password,
+    );
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Wrong Password" });
     }
+
+    // Find all chats involving this user
+    const userChats = await Chat.find({ users: userId });
+    const chatIds = userChats.map((chat) => chat._id);
+
+    // Delete all messages associated with these chats
+    await Message.deleteMany({ chatId: { $in: chatIds } });
+
+    // Delete the chats themselves
+    await Chat.deleteMany({ _id: { $in: chatIds } });
+
+    // Pull user ID and deleted chat IDs from all other users
+    await User.updateMany(
+      {},
+      {
+        $pull: {
+          pendingRequests: userId,
+          contacts: userId,
+          chats: { $in: chatIds },
+        },
+      },
+    );
+
+    // Delete the user
     await User.findByIdAndDelete(userId);
     res.status(200).json({ message: "Deleted User" });
   } catch (error) {
