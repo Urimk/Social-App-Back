@@ -21,18 +21,17 @@ export const uploadProfilePic = [
   upload.single("image"),
   async (req, res) => {
     try {
-      console.log("MMMM");
       const stream = cloudinary.uploader.upload_stream(
         { folder: "chatapp" },
         (error, result) => {
-          if (error) return res.status(500).json(error);
+          if (error) return res.status(500).json("Error uploading image");
           res.json({ url: result.secure_url });
         },
       );
 
       stream.end(req.file.buffer);
     } catch (err) {
-      res.status(500).json(err);
+      res.status(500).json("Error uploading image");
     }
   },
 ];
@@ -50,7 +49,7 @@ export const changeProfilePic = [
       const stream = cloudinary.uploader.upload_stream(
         { folder: "chatapp" },
         async (error, result) => {
-          if (error) return res.status(500).json(error);
+          if (error) return res.status(500).json("Error uploading image");
 
           await User.findByIdAndUpdate(userId, {
             image: result.secure_url,
@@ -62,7 +61,7 @@ export const changeProfilePic = [
 
       stream.end(req.file.buffer);
     } catch (err) {
-      res.status(500).json(err);
+      res.status(500).json("Error uploading image");
     }
   },
 ];

@@ -20,8 +20,11 @@ export const sendRequest = async (req, res) => {
     if (req.user.contacts.some((objId) => objId.equals(receiver.id))) {
       return res.status(400).json({ message: "Already friends" });
     }
-    receiver.pendingRequests.push(senderId);
-    receiver.save();
+    if (receiver.pendingRequests.some((objId) => objId.equals(senderId))) {
+      return res.status(400).json({ message: "Already requested" });
+    }
+    receiver.pendingRequests.addToSet(senderId);
+    await receiver.save();
     return res.status(200).json({
       message: "Friend request sent",
     });
@@ -44,8 +47,8 @@ export const getRequests = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     let requests = [];
-    for (const userId of existingUser.pendingRequests) {
-      const user = await User.findById(userId);
+    for (const otherUserId of existingUser.pendingRequests) {
+      const user = await User.findById(otherUserId);
       if (user) {
         requests.push({ displayName: user.displayName, image: user.image });
       }
@@ -72,6 +75,9 @@ export const deleteRequest = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     const receiverId = req.user.id;
+    if (!sender.pendingRequests.some((objId) => objId.equals(receiverId))) {
+      return res.status(400).json({ message: "Not requested" });
+    }
     await User.findByIdAndUpdate(receiverId, {
       $pull: { pendingRequests: sender._id },
     });
@@ -91,7 +97,7 @@ export const deleteUser = async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
-    const isPasswordCorrect = bcrypt.compare(req.body.password, user.password);
+    const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Wrong Password" });
     }

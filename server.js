@@ -9,6 +9,7 @@ import imageRoutes from "./routes/imageRoutes.js";
 import dns from "node:dns/promises";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import { socketAuth } from "./middleware/socketAuth.js";
 
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
@@ -49,7 +50,10 @@ const PORT = process.env.PORT || 5000;
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch((err) => {
+    console.error("MongoDB connection error:", err)
+    process.exit(1);
+  });
 
 app.use("/auth", authRoutes);
 app.use("/users", usersRoutes);
@@ -57,7 +61,7 @@ app.use("/chat", chatRoutes);
 app.use("/image", imageRoutes);
 
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "active", message: "Server is running" });
+  return res.status(200).json({ status: "active", message: "Server is running" });
 });
 
 const server = createServer(app);
@@ -71,17 +75,20 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-// Socket.io connection handling
+io.use(socketAuth);
+
 io.on("connection", (socket) => {
-  console.log("a user connected:", socket.id);
+  const userId = socket.data.userId;
+  if (!userId) {
+    socket.disconnect(true);
+    return;
+  }
+
+  socket.join(userId);
+  console.log(`User connected: ${socket.id} (room: ${userId})`);
 
   socket.on("disconnect", () => {
-    console.log("user disconnected:", socket.id);
-  });
-
-  socket.on("setup", (userId) => {
-    socket.join(userId.toString());
-    console.log("User joined personal room: ", userId.toString());
+    console.log(`User disconnected: ${socket.id}`);
   });
 });
 
