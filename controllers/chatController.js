@@ -34,12 +34,25 @@ export const addChat = async (req, res) => {
     sender.chats.push(newChat._id);
     await sender.save();
     const lastMessage = null;
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(sender._id.toString()).emit("request_accepted", {
+        id: newChat._id,
+        friendId: req.user._id || receiverId,
+        friendName: req.user.displayName,
+        image: req.user.image,
+        lastMessage: lastMessage,
+      });
+    }
+
     return res.status(201).json({
       message: "Chat created successfully",
       chat: {
         id: newChat._id,
         friendId: sender._id,
         friendName: sender.displayName,
+        image: sender.image,
         lastMessage: lastMessage,
       },
     });
