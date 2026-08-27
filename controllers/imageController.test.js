@@ -25,15 +25,10 @@ describe("Image Controller", () => {
 
 describe("getProfilePic", () => {
     test("should return 200 with the profile image url", async () => {
-      jest.spyOn(User, "findById").mockResolvedValue({
-        _id: "user123",
-        username: "User",
-        image: "http://example.com/old.jpg",
-      });
+      req.user.image = "http://example.com/old.jpg";
 
       await getProfilePic(req, res);
 
-      expect(User.findById).toHaveBeenCalledWith("user123");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         image: "http://example.com/old.jpg",
