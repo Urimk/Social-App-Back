@@ -26,6 +26,6 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: test-secret-key
-          CLOUDINARY_CLOUD_NAME: test-cloud
-          CLOUDINARY_API_KEY: 1234567890
-          CLOUDINARY_API_SECRET: test-secret
+          CLOUD_NAME: test-cloud
+          CLOUD_API_KEY: 1234567890
+          CLOUD_API_SECRET: test-secret
